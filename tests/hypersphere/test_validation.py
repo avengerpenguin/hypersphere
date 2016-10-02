@@ -147,3 +147,35 @@ def test_allows_authentication(request):
     assert response.status_code == 200
 
     assert request.headers['REMOTE_USER'] == 'testuser'
+
+
+def test_allows_authorisation(request):
+    class SecretResource(hypersphere.Resource):
+        def authenticate(self, request):
+            if 'Authorization' in request.headers:
+                userpass = request.headers['Authorization'].split()[-1]
+                userpass = base64.b64decode(userpass.encode('utf-8')).decode('utf-8')
+                username, password = userpass.split(':')
+                print(password)
+                if password == 'hunter2':
+                    request.headers['REMOTE_USER'] = username
+                    return True
+                else:
+                    return False
+            else:
+                return False
+
+        def authorise(self, request):
+            if 'REMOTE_USER' in request.headers and request.headers['REMOTE_USER'] == 'alice':
+                return True
+            else:
+                return False
+
+    resource = SecretResource()
+    request.headers['Authorization'] = 'Basic ' + base64.b64encode(b'bob:hunter2').decode('utf-8')
+    response = resource.respond(request)
+    assert response.status_code == 403
+
+    request.headers['Authorization'] = 'Basic ' + base64.b64encode(b'alice:hunter2').decode('utf-8')
+    response = resource.respond(request)
+    assert response.status_code == 200

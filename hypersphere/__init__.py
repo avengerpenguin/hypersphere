@@ -59,6 +59,9 @@ class Resource(object):
     def authenticate(self, request):
         return True
 
+    def authorise(self, request):
+        return True
+
     def respond(self, request):
         return (
             UnresolvedResponse(self, request)
