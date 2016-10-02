@@ -8,7 +8,7 @@ class Response(pymonad.Monad):
     def __init__(self):
         """
         Raises a NotImplementedError.
-        Only crea   te ResolvedResponse or UnresolvedResponse.
+        Only create ResolvedResponse or UnresolvedResponse.
         """
         raise NotImplementedError()
 
@@ -49,6 +49,7 @@ class Resource(object):
         'GET', 'HEAD', 'POST', 'PUT', 'DELETE',
         'TRACE', 'CONNECT', 'OPTIONS'
     }
+    allowed_methods = ['GET', 'HEAD', 'OPTIONS']
     max_uri_length = 4096
 
     def respond(self, request):
@@ -58,5 +59,6 @@ class Resource(object):
             >> validate.check_available
             >> validate.method_known
             >> validate.uri_length_within_limit
+            >> validate.method_allowed
             >> blank_200
         ).getValue()
