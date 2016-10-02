@@ -19,3 +19,8 @@ def uri_length_within_limit(resource, request):
 def method_allowed(resource, request):
     if request.method not in resource.allowed_methods:
         return webob.Response(status=405)
+
+
+def request_valid(resource, request):
+    if not resource.validate_request(request):
+        return webob.Response(status=400)

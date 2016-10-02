@@ -52,6 +52,9 @@ class Resource(object):
     allowed_methods = ['GET', 'HEAD', 'OPTIONS']
     max_uri_length = 4096
 
+    def validate_request(self, request):
+        return True
+
     def respond(self, request):
 
         return (
@@ -60,5 +63,6 @@ class Resource(object):
             >> validate.method_known
             >> validate.uri_length_within_limit
             >> validate.method_allowed
+            >> validate.request_valid
             >> blank_200
         ).getValue()

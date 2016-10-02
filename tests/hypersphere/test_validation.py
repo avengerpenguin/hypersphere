@@ -1,4 +1,5 @@
 import pytest
+import re
 import webob
 import hypersphere
 
@@ -94,3 +95,21 @@ def test_disallows_delete_by_default(hello_world_resource, request):
     request.environ['REQUEST_METHOD'] = 'DELETE'
     response = hello_world_resource.respond(request)
     assert response.status_code == 405
+
+
+def test_allows_request_validation(request):
+    class PeopleResource(hypersphere.Resource):
+        def validate_request(self, request):
+            """Expects URLs such as /people/123"""
+            return re.match('^/people/\d+$', request.path)
+
+    resource = PeopleResource()
+
+    request.environ['PATH_INFO'] = '/people/123'
+    response = resource.respond(request)
+    assert response.status_code == 200
+
+
+    request.environ['PATH_INFO'] = '/people/abc'
+    response = resource.respond(request)
+    assert response.status_code == 400
