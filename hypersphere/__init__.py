@@ -44,6 +44,7 @@ def blank_200(_resource, _request):
 
 
 class Resource(object):
+
     available = True
     known_methods = {
         'GET', 'HEAD', 'POST', 'PUT', 'DELETE',
@@ -55,8 +56,10 @@ class Resource(object):
     def validate_request(self, request):
         return True
 
-    def respond(self, request):
+    def authenticate(self, request):
+        return True
 
+    def respond(self, request):
         return (
             UnresolvedResponse(self, request)
             >> validate.check_available
@@ -64,5 +67,7 @@ class Resource(object):
             >> validate.uri_length_within_limit
             >> validate.method_allowed
             >> validate.request_valid
+            >> validate.authenticate
+            >> validate.authorise
             >> blank_200
         ).getValue()

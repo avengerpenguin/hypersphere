@@ -1,3 +1,5 @@
+import base64
+
 import pytest
 import re
 import webob
@@ -105,11 +107,39 @@ def test_allows_request_validation(request):
 
     resource = PeopleResource()
 
+    # valid URI
     request.environ['PATH_INFO'] = '/people/123'
     response = resource.respond(request)
     assert response.status_code == 200
 
-
+    # invalid URI
     request.environ['PATH_INFO'] = '/people/abc'
     response = resource.respond(request)
     assert response.status_code == 400
+
+
+def test_allows_authentication(request):
+    class SecretResource(hypersphere.Resource):
+        def authenticate(self, request):
+            if 'Authorization' in request.headers:
+                userpass = request.headers['Authorization'].split()[-1]
+                userpass = base64.b64decode(userpass.encode('utf-8')).decode('utf-8')
+                username, password = userpass.split(':')
+                print(password)
+                if password == 'hunter2':
+                    request.headers['REMOTE_USER'] = username
+                    return True
+                else:
+                    return False
+            else:
+                return False
+
+    resource = SecretResource()
+    response = resource.respond(request)
+    assert response.status_code == 401
+    request.headers['Authorization'] = 'Basic ' + base64.b64encode(b'testuser:hunter1').decode('utf-8')
+    response = resource.respond(request)
+    assert response.status_code == 401
+    request.headers['Authorization'] = 'Basic ' + base64.b64encode(b'testuser:hunter2').decode('utf-8')
+    response = resource.respond(request)
+    assert response.status_code == 200

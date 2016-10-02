@@ -24,3 +24,12 @@ def method_allowed(resource, request):
 def request_valid(resource, request):
     if not resource.validate_request(request):
         return webob.Response(status=400)
+
+
+def authenticate(resource, request):
+    if not resource.authenticate(request):
+        return webob.Response(status=401)
+
+
+def authorise(resource, request):
+    return None
