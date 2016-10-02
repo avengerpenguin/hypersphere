@@ -137,9 +137,13 @@ def test_allows_authentication(request):
     resource = SecretResource()
     response = resource.respond(request)
     assert response.status_code == 401
+
     request.headers['Authorization'] = 'Basic ' + base64.b64encode(b'testuser:hunter1').decode('utf-8')
     response = resource.respond(request)
     assert response.status_code == 401
+
     request.headers['Authorization'] = 'Basic ' + base64.b64encode(b'testuser:hunter2').decode('utf-8')
     response = resource.respond(request)
     assert response.status_code == 200
+
+    assert request.headers['REMOTE_USER'] == 'testuser'
