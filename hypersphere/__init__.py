@@ -1,7 +1,7 @@
 import pymonad as pymonad
 import webob
-
-import hypersphere.validate as validate
+import cgi
+from . import parse, validate
 
 
 class Response(pymonad.Monad):
@@ -62,6 +62,23 @@ class Resource(object):
     def authorise(self, request):
         return True
 
+    def request_body_parser(self):
+        return parse.choose
+
+    def process_request_entity(self, request):
+        if len(request.body) > 0:
+            if 'Content-Type' not in request.headers:
+                return webob.Response(status=415)
+
+            print(request.body)
+            mime = cgi.parse_header(request.headers['Content-Type'])
+            try:
+                resolver = self.request_body_parser()
+                entity = resolver(mime[0], **mime[1]).parse(request)
+                request.entity = entity
+            except KeyError:
+                return webob.Response(status=415)
+
     def respond(self, request):
         return (
             UnresolvedResponse(self, request)
@@ -72,5 +89,7 @@ class Resource(object):
             >> validate.request_valid
             >> validate.authenticate
             >> validate.authorise
+            # TODO: Validate Content-* headers?
+            >> Resource.process_request_entity
             >> blank_200
         ).getValue()
