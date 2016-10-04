@@ -52,6 +52,7 @@ class Resource(object):
     }
     allowed_methods = ['GET', 'HEAD', 'OPTIONS']
     max_uri_length = 4096
+    max_request_body_length = 10 * 1014 * 1024
 
     def validate_request(self, request):
         return True
@@ -70,7 +71,9 @@ class Resource(object):
             if 'Content-Type' not in request.headers:
                 return webob.Response(status=415)
 
-            print(request.body)
+            if len(request.body) > self.max_request_body_length:
+                return webob.Response(status=413)
+
             mime = cgi.parse_header(request.headers['Content-Type'])
             try:
                 resolver = self.request_body_parser()
