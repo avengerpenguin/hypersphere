@@ -10,13 +10,13 @@ def choose(mime, **kwargs):
 class BaseParser(object):
     def __init__(self, mime, charset='utf-8', **kwargs):
         self.mime = mime
-        self.encoding = charset
+        self.charset = charset
         self.options = kwargs
 
 
 class JsonParser(BaseParser):
     def parse(self, request):
-        return json.loads(request.body.decode(self.encoding))
+        return json.loads(request.body.decode(self.charset))
 
 
 class RDFParser(BaseParser):

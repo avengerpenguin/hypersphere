@@ -1,7 +1,7 @@
 import pymonad as pymonad
 import webob
 import cgi
-from . import parse, validate
+from . import parse, validate, accept
 
 
 class Response(pymonad.Monad):
@@ -53,6 +53,10 @@ class Resource(object):
     allowed_methods = ['GET', 'HEAD', 'OPTIONS']
     max_uri_length = 4096
     max_request_body_length = 10 * 1014 * 1024
+    acceptable_media_types = ['text/turtle']
+    acceptable_languages = {'en',}
+    acceptable_charsets = {'utf-8',}
+    acceptable_encodings = {'identity',}
 
     def validate_request(self, request):
         return True
@@ -94,5 +98,9 @@ class Resource(object):
             >> validate.authorise
             # TODO: Validate Content-* headers?
             >> Resource.process_request_entity
+            >> accept.media_type
+            >> accept.languages
+            >> accept.charsets
+            >> accept.encodings
             >> blank_200
         ).getValue()
