@@ -1,7 +1,9 @@
+import cgi
+
 import pymonad as pymonad
 import webob
-import cgi
-from . import parse, validate, accept
+
+from . import accept, parse, validate
 
 
 class Response(pymonad.Monad):
@@ -43,20 +45,32 @@ def blank_200(_resource, _request):
     return webob.Response(status=200)
 
 
-class Resource(object):
+class Resource:
 
     available = True
     known_methods = {
-        'GET', 'HEAD', 'POST', 'PUT', 'DELETE',
-        'TRACE', 'CONNECT', 'OPTIONS'
+        "GET",
+        "HEAD",
+        "POST",
+        "PUT",
+        "DELETE",
+        "TRACE",
+        "CONNECT",
+        "OPTIONS",
     }
-    allowed_methods = ['GET', 'HEAD', 'OPTIONS']
+    allowed_methods = ["GET", "HEAD", "OPTIONS"]
     max_uri_length = 4096
     max_request_body_length = 10 * 1014 * 1024
-    acceptable_media_types = ['text/turtle']
-    acceptable_languages = {'en',}
-    acceptable_charsets = {'utf-8',}
-    acceptable_encodings = {'identity',}
+    acceptable_media_types = ["text/turtle"]
+    acceptable_languages = {
+        "en",
+    }
+    acceptable_charsets = {
+        "utf-8",
+    }
+    acceptable_encodings = {
+        "identity",
+    }
 
     def validate_request(self, request):
         return True
@@ -72,13 +86,13 @@ class Resource(object):
 
     def process_request_entity(self, request):
         if len(request.body) > 0:
-            if 'Content-Type' not in request.headers:
+            if "Content-Type" not in request.headers:
                 return webob.Response(status=415)
 
             if len(request.body) > self.max_request_body_length:
                 return webob.Response(status=413)
 
-            mime = cgi.parse_header(request.headers['Content-Type'])
+            mime = cgi.parse_header(request.headers["Content-Type"])
             try:
                 resolver = self.request_body_parser()
                 entity = resolver(mime[0], **mime[1]).parse(request)
