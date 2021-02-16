@@ -127,7 +127,9 @@ def test_allows_authentication(request):
         def authenticate(self, request):
             if "Authorization" in request.headers:
                 userpass = request.headers["Authorization"].split()[-1]
-                userpass = base64.b64decode(userpass.encode("utf-8")).decode("utf-8")
+                userpass = base64.b64decode(userpass.encode("utf-8")).decode(
+                    "utf-8"
+                )
                 username, password = userpass.split(":")
                 print(password)
                 if password == "hunter2":
@@ -162,7 +164,9 @@ def test_allows_authorisation(request):
         def authenticate(self, request):
             if "Authorization" in request.headers:
                 userpass = request.headers["Authorization"].split()[-1]
-                userpass = base64.b64decode(userpass.encode("utf-8")).decode("utf-8")
+                userpass = base64.b64decode(userpass.encode("utf-8")).decode(
+                    "utf-8"
+                )
                 username, password = userpass.split(":")
                 print(password)
                 if password == "hunter2":
