@@ -12,9 +12,19 @@ class Response(pymonad.Monad):
         """
         raise NotImplementedError()
 
+    @classmethod
+    def unit(cls, value):
+        return ResolvedResponse(value)
+
     @staticmethod
     def mzero():
         return UnresolvedResponse()
+
+    def fmap(self, function):
+        raise NotImplementedError
+
+    def bind(self, function):
+        raise NotImplementedError
 
 
 class ResolvedResponse(Response):
@@ -22,7 +32,11 @@ class ResolvedResponse(Response):
         self.value = response
 
     def bind(self, _function):
+        """We cannot do more with a resolved response."""
         return self
+
+    def fmap(self, function):
+        return function(self)
 
 
 class UnresolvedResponse(Response):
@@ -37,6 +51,9 @@ class UnresolvedResponse(Response):
             return ResolvedResponse(response)
         else:
             return self
+
+    def fmap(self, function):
+        return self
 
 
 def blank_200(_resource, _request):

@@ -13,6 +13,9 @@ class BaseParser(object):
         self.charset = charset
         self.options = kwargs
 
+    def parse(self, request):
+        raise NotImplementedError
+
 
 class JsonParser(BaseParser):
     def parse(self, request):
@@ -27,8 +30,6 @@ class RDFParser(BaseParser):
 
 
 parser_map = {'application/json': JsonParser}
-
-
 for plugin in rdflib.plugin.plugins(kind=Parser):
     if '/' in plugin.name:
         parser_map[plugin.name] = RDFParser
